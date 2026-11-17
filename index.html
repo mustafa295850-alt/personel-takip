@@ -302,7 +302,7 @@ const METIN = {
     calistiginGunler: 'Çalıştığın günler', onaylanan: 'Onaylanan', onayBekleyen: 'Onay bekleyen', aldiginKiyafetler: 'Aldığın kıyafetler',
     fiyatEuro: 'Fiyat €', ekle: 'Ekle', yukleniyor: 'Yükleniyor…', personelYok: 'Henüz personel yok. “+ Personel ekle” ile başla.',
     fiyatRakam: 'Fiyatı rakamla yaz (ör. 24,99).', eklendiBekler: 'Eklendi. Yönetici onaylayınca kesinleşir.',
-    kodMesaji: 'Personel Takip giriş kodun: {k}', kodKopyalandi: 'Kod kopyalandı: {k}',
+    kodMesaji: 'Personel Takip giriş kodun: {k}\nUygulama: {link}\niPhone: linki Safari ile aç, Paylaş → Ana Ekrana Ekle.', kodKopyalandi: 'Kod kopyalandı: {k}',
     gelisKaydedildi: 'Geliş kaydedildi: {s}', cikisKaydedildi: 'Çıkış kaydedildi: {s}',
     kiyafetSilSor: 'Bu kıyafet silinsin mi?', yeniKodSor: '{ad} için yeni kod üretilsin mi? Eski kod hemen çalışmaz olur.',
     personelSilSor: '{ad} ve bütün haftalardaki kayıtları silinsin mi? Geri alınamaz.', buPersonel: 'Bu personel',
@@ -346,7 +346,7 @@ const METIN = {
     calistiginGunler: 'Jouw gewerkte dagen', onaylanan: 'Goedgekeurd', onayBekleyen: 'Wacht op goedkeuring', aldiginKiyafetler: 'Jouw gekochte kleding',
     fiyatEuro: 'Prijs €', ekle: 'Toevoegen', yukleniyor: 'Laden…', personelYok: 'Nog geen medewerkers. Begin met “+ Medewerker toevoegen”.',
     fiyatRakam: 'Vul de prijs in als getal (bijv. 24,99).', eklendiBekler: 'Toegevoegd. Definitief zodra je leidinggevende het goedkeurt.',
-    kodMesaji: 'Je inlogcode voor Personel Takip: {k}', kodKopyalandi: 'Code gekopieerd: {k}',
+    kodMesaji: 'Je inlogcode voor Personel Takip: {k}\nApp: {link}\niPhone: open de link in Safari, Deel → Zet op beginscherm.', kodKopyalandi: 'Code gekopieerd: {k}',
     gelisKaydedildi: 'Ingeklokt om {s}', cikisKaydedildi: 'Uitgeklokt om {s}',
     kiyafetSilSor: 'Dit kledingstuk verwijderen?', yeniKodSor: 'Nieuwe code maken voor {ad}? De oude code werkt dan meteen niet meer.',
     personelSilSor: '{ad} en alle registraties van alle weken verwijderen? Dit kan niet ongedaan worden gemaakt.', buPersonel: 'Deze medewerker',
@@ -390,7 +390,7 @@ const METIN = {
     calistiginGunler: 'Your days worked', onaylanan: 'Approved', onayBekleyen: 'Awaiting approval', aldiginKiyafetler: 'Clothes you bought',
     fiyatEuro: 'Price €', ekle: 'Add', yukleniyor: 'Loading…', personelYok: 'No staff yet. Start with “+ Add staff”.',
     fiyatRakam: 'Enter the price as a number (e.g. 24.99).', eklendiBekler: 'Added. It becomes final once your manager approves it.',
-    kodMesaji: 'Your Personel Takip login code: {k}', kodKopyalandi: 'Code copied: {k}',
+    kodMesaji: 'Your Personel Takip login code: {k}\nApp: {link}\niPhone: open the link in Safari, then Share → Add to Home Screen.', kodKopyalandi: 'Code copied: {k}',
     gelisKaydedildi: 'Clocked in at {s}', cikisKaydedildi: 'Clocked out at {s}',
     kiyafetSilSor: 'Delete this item?', yeniKodSor: 'Create a new code for {ad}? The old code stops working immediately.',
     personelSilSor: 'Delete {ad} and all their records for every week? This cannot be undone.', buPersonel: 'This staff member',
@@ -446,6 +446,7 @@ function dilDegistir(d) {
 
 // ======================= GENEL =======================
 const SUNUCU_VARSAYILAN = 'https://script.google.com/macros/s/AKfycbziwVKu_7P72v1lYr_tI1qb0y2pfUJUh21jN2w_OJOWUJOCIpEsftLu3r2QA7dSNg/exec';
+const SITE = 'https://mustafa295850-alt.github.io/personel-takip/';
 const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })();
 const NATIVE = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? window.Capacitor.Plugins : null;
 
@@ -914,7 +915,7 @@ liste.addEventListener('submit', e => {
 });
 
 async function kodPaylas(p) {
-  const metin = t('kodMesaji', { k: p.kod });
+  const metin = t('kodMesaji', { k: p.kod, link: SITE });
   try {
     if (NATIVE && NATIVE.Share) { await NATIVE.Share.share({ title: t('girisKodu'), text: metin }); return; }
     if (navigator.share) { await navigator.share({ title: t('girisKodu'), text: metin }); return; }
