@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Personel">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="simge-180.png">
+<link rel="icon" href="simge-192.png">
+<title>Personel Takip</title>
+<style>
+:root {
+  --zemin: #f4f3ef; --kart: #ffffff; --yazi: #1d1c1a; --ikincil: #6b6760; --cizgi: #e2dfd8;
+  --vurgu: #2f5d50; --vurgu-yazi: #ffffff;
+  --yesil: #2e7d4f; --yesil-zemin: #e3f2e8; --kirmizi: #b23b3b; --kirmizi-zemin: #f8e6e4;
+  --sari: #8a6100; --sari-zemin: #fbf0d4; --input: #faf9f6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --zemin: #171716; --kart: #22211f; --yazi: #ecebe7; --ikincil: #a29e95; --cizgi: #383631;
+    --vurgu: #6fb39d; --vurgu-yazi: #10201b;
+    --yesil: #7cc79a; --yesil-zemin: #1f3427; --kirmizi: #e88a84; --kirmizi-zemin: #3a2321;
+    --sari: #e8c36a; --sari-zemin: #3a3020; --input: #1b1a19;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--zemin); color: var(--yazi);
+  font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+header {
+  position: sticky; top: 0; z-index: 5; background: var(--zemin);
+  border-bottom: 1px solid var(--cizgi); padding: 12px 16px;
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+}
+h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+.hafta-nav { display: flex; align-items: center; gap: 6px; }
+#haftaEtiket { font-weight: 600; min-width: 190px; text-align: center; }
+.ust-butonlar { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; align-items: center; }
+#durum { font-size: 12px; color: var(--ikincil); white-space: nowrap; }
+#durum.uyari { color: var(--sari); font-weight: 600; }
+button, .buton {
+  font: inherit; font-size: 14px; border: 1px solid var(--cizgi); background: var(--kart); color: var(--yazi);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+button:hover { border-color: var(--ikincil); }
+button:disabled { opacity: .5; cursor: default; }
+button.birincil { background: var(--vurgu); color: var(--vurgu-yazi); border-color: var(--vurgu); font-weight: 600; }
+button.kucuk { padding: 3px 9px; font-size: 13px; }
+button.sil { color: var(--kirmizi); }
+button.onay { color: var(--yesil); font-weight: 600; }
+select.dil { font-size: 14px; padding: 5px 6px; border-radius: 8px; background: var(--kart); }
+main, #ozet, #duyurular { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+#ozet { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+.ozet-kutu { background: var(--kart); border: 1px solid var(--cizgi); border-radius: 10px; padding: 10px 14px; }
+.ozet-kutu small { color: var(--ikincil); display: block; font-size: 12px; }
+.ozet-kutu b { font-size: 18px; font-variant-numeric: tabular-nums; }
+#duyurular { display: grid; gap: 8px; margin-top: 12px; }
+.duyuru { background: var(--sari-zemin); color: var(--sari); border-radius: 10px; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; font-weight: 600; }
+.duyuru.yesil { background: var(--yesil-zemin); color: var(--yesil); }
+#liste { display: grid; gap: 16px; margin-top: 16px; padding-bottom: 40px; }
+.bos { text-align: center; color: var(--ikincil); padding: 40px 0; }
+.tuslar { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.personel-tus {
+  text-align: left; padding: 16px; border-radius: 12px; border: 1px solid var(--cizgi);
+  background: var(--kart); display: grid; gap: 6px; min-height: 104px; align-content: start;
+  transition: transform .15s cubic-bezier(0.23, 1, 0.32, 1), border-color .15s;
+}
+.personel-tus:hover { border-color: var(--vurgu); }
+.personel-tus:active { transform: scale(0.97); }
+.tus-ad { font-size: 18px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.tus-bilgi { color: var(--ikincil); font-size: 13px; font-variant-numeric: tabular-nums; }
+.rozetler { display: flex; flex-wrap: wrap; gap: 6px; }
+.rozet { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; }
+.rozet.odendi { background: var(--yesil-zemin); color: var(--yesil); }
+.rozet.odenmedi { background: var(--kirmizi-zemin); color: var(--kirmizi); }
+.rozet.bekliyor { background: var(--sari-zemin); color: var(--sari); }
+.yeni-tus { border-style: dashed; color: var(--vurgu); font-weight: 600; font-size: 16px; place-content: center; text-align: center; }
+#geri { font-weight: 600; }
+.kart { background: var(--kart); border: 1px solid var(--cizgi); border-radius: 12px; padding: 16px; }
+.kart-ust { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+.kart-ust .ad { font-size: 17px; font-weight: 600; flex: 1 1 200px; }
+.kod-alan { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; color: var(--ikincil); margin-bottom: 12px; }
+.kod-alan b { font-family: ui-monospace, Consolas, monospace; font-size: 17px; letter-spacing: .12em; color: var(--yazi); }
+input, select {
+  font: inherit; color: var(--yazi); background: var(--input);
+  border: 1px solid var(--cizgi); border-radius: 6px; padding: 5px 8px; min-width: 0;
+}
+input:focus, select:focus { outline: 2px solid var(--vurgu); outline-offset: -1px; }
+input:disabled, select:disabled { opacity: .7; }
+label.alan { display: flex; align-items: center; gap: 6px; color: var(--ikincil); font-size: 14px; }
+label.alan input { width: 90px; }
+.durum-tus { font-weight: 600; border-radius: 999px; padding: 4px 14px; }
+.durum-tus.odendi { background: var(--yesil-zemin); color: var(--yesil); border-color: transparent; }
+.durum-tus.odenmedi { background: var(--kirmizi-zemin); color: var(--kirmizi); border-color: transparent; }
+.ic { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; }
+@media (max-width: 820px) { .ic { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ikincil); padding: 4px 6px; border-bottom: 1px solid var(--cizgi); }
+td { padding: 4px 6px; border-bottom: 1px solid var(--cizgi); vertical-align: middle; }
+td input[type="time"] { width: 100%; }
+.tarih { color: var(--ikincil); font-size: 12px; }
+.sayi { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tfoot td { font-weight: 600; border-bottom: none; }
+tr.bekleyen-satir td { background: var(--sari-zemin); color: var(--sari); font-size: 13px; }
+tr.bekleyen-satir button { margin-left: 4px; }
+.etiket { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 0 6px; background: var(--kart); color: var(--sari); margin-left: 4px; }
+tr.kiyafet-bekliyor td { background: var(--sari-zemin); }
+h3 { font-size: 14px; margin: 0 0 6px; color: var(--ikincil); font-weight: 600; }
+.kiyafet-satir input.k-ad { width: 100%; }
+.kiyafet-satir input.k-fiyat { width: 80px; text-align: right; }
+.not { font-size: 12px; color: var(--ikincil); margin: 6px 0 0; }
+.hesap { margin-top: 14px; border-top: 1px solid var(--cizgi); padding-top: 10px; display: grid; gap: 2px; max-width: 360px; margin-left: auto; }
+.hesap div { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.hesap .net { font-size: 18px; font-weight: 700; border-top: 1px solid var(--cizgi); padding-top: 6px; margin-top: 4px; }
+.eksi { color: var(--kirmizi); }
+.damga { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 8px 0 18px; border-bottom: 1px solid var(--cizgi); margin-bottom: 14px; }
+.damga .bugun { color: var(--ikincil); font-size: 14px; }
+.damga-tus { font-size: 22px; font-weight: 700; padding: 18px 40px; border-radius: 16px; min-width: 220px; border: none; }
+.damga-tus.geldim { background: var(--vurgu); color: var(--vurgu-yazi); }
+.damga-tus.ciktim { background: #c7782a; color: #fff; }
+.damga-tus:active { transform: scale(0.97); }
+.durum-isaret { font-size: 13px; }
+.durum-isaret.ok { color: var(--yesil); }
+.durum-isaret.bek { color: var(--sari); }
+.ekle-form { display: grid; grid-template-columns: 1fr 90px; gap: 6px; margin-top: 10px; }
+.ekle-form select { grid-column: 1; }
+.ekle-form button { grid-column: 2; }
+#girisEkrani { min-height: 90vh; display: grid; place-items: center; padding: 16px; }
+.giris-kutu { width: 100%; max-width: 360px; background: var(--kart); border: 1px solid var(--cizgi); border-radius: 16px; padding: 28px 22px; display: grid; gap: 12px; text-align: center; }
+.giris-kutu img { width: 72px; height: 72px; justify-self: center; border-radius: 18px; }
+.giris-kutu input { font-size: 22px; text-align: center; letter-spacing: .15em; text-transform: uppercase; padding: 10px; }
+.giris-kutu button { font-size: 17px; padding: 10px; }
+.giris-kutu p { margin: 0; color: var(--ikincil); }
+.dil-sec { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.dil-sec button { font-size: 13px; padding: 4px 10px; }
+.dil-sec button[aria-pressed="true"] { background: var(--vurgu); color: var(--vurgu-yazi); border-color: var(--vurgu); }
+#girisHata { color: var(--kirmizi); font-weight: 600; min-height: 1.5em; }
+#toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--yazi); color: var(--zemin); padding: 10px 16px; border-radius: 10px; max-width: calc(100% - 32px); z-index: 20; white-space: pre-line; font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+@media (max-width: 600px) {
+  header { position: static; }
+  #haftaEtiket { min-width: 0; font-size: 14px; }
+  .ust-butonlar { margin-left: 0; }
+  td, th { padding: 4px 3px; }
+  .kart { padding: 12px; }
+  .ic, .ic > div { min-width: 0; }
+  .gunler { table-layout: fixed; }
+  .gunler th:nth-child(1) { width: 27%; }
+  .gunler th:nth-child(4) { width: 21%; }
+  .gunler td.sayi { white-space: normal; font-size: 13px; }
+  .gunler input[type="time"] { padding: 4px 2px; font-size: 14px; }
+  .durum-isaret { font-size: 12px; }
+  .kiyafet-tablo thead { display: none; }
+  .kiyafet-tablo tr.kiyafet-satir {
+    display: grid; grid-template-columns: 1fr 84px 34px; gap: 6px;
+    grid-template-areas: "ad ad sil" "tur fiyat fiyat" "tutar tutar tutar";
+    padding: 8px 0; border-bottom: 1px solid var(--cizgi);
+  }
+  .kiyafet-satir td { border: none; padding: 0; }
+  .kiyafet-satir td:nth-child(1) { grid-area: ad; }
+  .kiyafet-satir td:nth-child(2) { grid-area: fiyat; }
+  .kiyafet-satir td:nth-child(2) input { width: 100%; }
+  .kiyafet-satir td:nth-child(3) { grid-area: tur; }
+  .kiyafet-satir td:nth-child(3) select { width: 100%; }
+  .kiyafet-satir td:nth-child(4) { grid-area: tutar; font-size: 13px; color: var(--ikincil); text-align: left; }
+  .kiyafet-satir td:nth-child(5) { grid-area: sil; }
+}
+@media print {
+  header .ust-butonlar, .hafta-nav button, .yazdirma, #duyurular, .kod-alan { display: none !important; }
+  header { position: static; }
+  body { background: #fff; color: #000; }
+  .kart { break-inside: avoid; border-color: #999; }
+  input, select { border: none; background: none; padding: 0; appearance: none; }
+}
+</style>
+</head>
+<body>
+
+<section id="girisEkrani" hidden>
+  <div class="giris-kutu">
+    <img src="simge-192.png" alt="">
+    <h1 data-t="uygulamaAdi"></h1>
+    <div class="dil-sec" id="dilTuslari">
+      <button data-dil="tr">Türkçe</button><button data-dil="nl">Nederlands</button><button data-dil="en">English</button>
+    </div>
+    <p data-t="girisAciklama"></p>
+    <input id="kodInput" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" data-t-aria="girisKodu">
+    <input id="sunucuInput" hidden data-t-ph="sunucuAdresi" style="font-size:13px;letter-spacing:0;text-transform:none">
+    <button id="girisTus" class="birincil" data-t="giris"></button>
+    <p id="girisHata" role="alert"></p>
+  </div>
+</section>
+
+<div id="uygulama" hidden>
+  <header>
+    <button id="geri" hidden data-t="tumPersonel"></button>
+    <h1 id="baslik"></h1>
+    <div class="hafta-nav">
+      <button id="onceki" data-t-aria="oncekiHafta">‹</button>
+      <div id="haftaEtiket"></div>
+      <button id="sonraki" data-t-aria="sonrakiHafta">›</button>
+      <button id="buHafta" data-t="buHafta"></button>
+    </div>
+    <div class="ust-butonlar">
+      <span id="durum"></span>
+      <button id="ekle" class="birincil" hidden data-t="personelEkle"></button>
+      <button id="yenile" data-t="yenile"></button>
+      <button id="yazdir" hidden data-t="yazdir"></button>
+      <select id="dilSecim" class="dil" data-t-aria="dil">
+        <option value="tr">TR</option><option value="nl">NL</option><option value="en">EN</option>
+      </select>
+      <button id="cikis" data-t="cikisYap"></button>
+    </div>
+  </header>
+  <section id="duyurular"></section>
+  <section id="ozet"></section>
+  <main id="liste"></main>
+</div>
+<div id="toast" hidden role="status"></div>
+
+<script src="ortak.js"></script>
+<script>
+// ======================= HESAP (CALC-START) =======================
+const PERSONEL_INDIRIMI = 0.20; // indirimsiz kıyafette %20
+
+function dakika(s) {
+  if (!s) return null;
+  const [h, m] = String(s).split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+}
+// Çıkış girişten küçükse gece yarısını geçmiş sayılır (ör. 18:00 → 02:00 = 8 saat)
+function gunSaati(giris, cikis) {
+  const a = dakika(giris), b = dakika(cikis);
+  if (a === null || b === null) return 0;
+  let fark = b - a;
+  if (fark < 0) fark += 1440;
+  return fark / 60;
+}
+function yuvarla(x) { return Math.round((x + Number.EPSILON) * 100) / 100; }
+function sayiOku(x) { const n = Number(String(x ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0; }
+function indirimliMi(k) { return k.indirimli === true || k.indirimli === '1'; }
+function kiyafetTutari(k) {
+  const fiyat = sayiOku(k.fiyat);
+  return indirimliMi(k) ? fiyat : fiyat * (1 - PERSONEL_INDIRIMI);
+}
+// Sadece onaylanmış saatler ve kıyafetler hesaba girer
+function hesapla(kayit) {
+  let saat = 0, bekSaat = 0, bekleyen = 0;
+  for (const g of Object.values(kayit.gunler || {})) {
+    saat += gunSaati(g.onayGiris, g.onayCikis);
+    if ((g.giris || '') !== (g.onayGiris || '') || (g.cikis || '') !== (g.onayCikis || '')) { bekleyen++; bekSaat += gunSaati(g.giris, g.cikis); }
+  }
+  const onayli = (kayit.kiyafetler || []).filter(k => k.onay === '1');
+  bekleyen += (kayit.kiyafetler || []).length - onayli.length;
+  const brut = yuvarla(saat * sayiOku(kayit.saatUcreti));
+  const kiyafet = yuvarla(onayli.reduce((t, k) => t + kiyafetTutari(k), 0));
+  return { saat: yuvarla(saat), bekSaat: yuvarla(bekSaat), bekleyen, brut, kiyafet, net: yuvarla(brut - kiyafet) };
+}
+// ======================= HESAP (CALC-END) =======================
+
+// ======================= DİLLER =======================
+const METIN = {
+  tr: {
+    yerel: 'tr-TR',
+    gunler: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+    uygulamaAdi: 'Personel Takip', girisAciklama: 'Sana verilen giriş kodunu yaz.', girisKodu: 'Giriş kodu', sunucuAdresi: 'Sunucu adresi',
+    giris: 'Giriş', kontrol: 'Kontrol ediliyor…', koduYaz: 'Kodu yaz.', kodYanlis: 'Bu kod yanlış.', baglanamadi: 'Bağlanılamadı. İnternetini kontrol et.',
+    kodGecersiz: 'Bu kod artık geçerli değil. Yöneticinden yeni kod iste.',
+    tumPersonel: '‹ Tüm personel', oncekiHafta: 'Önceki hafta', sonrakiHafta: 'Sonraki hafta', buHafta: 'Bu hafta',
+    personelEkle: '+ Personel ekle', yenile: 'Yenile', yazdir: 'Yazdır', cikisYap: 'Çıkış yap', dil: 'Dil',
+    internetYok: 'İnternet yok', internetYokN: 'İnternet yok · {n} kayıt bekliyor', kaydediliyor: 'Kaydediliyor…', yenileniyor: 'Yenileniyor…', guncel: '● Güncel {t}',
+    gonderilmedi: '{n} kayıt henüz gönderilmedi. Çıkış yaparsan kaybolur. Yine de çıkılsın mı?', cikisSor: 'Çıkış yapılsın mı?',
+    isimsiz: 'İsimsiz personel', personel: 'Personel', saatBirim: '{h} saat', kayitYok: 'Bu hafta kayıt yok',
+    nBekliyor: '⏳ {n} onay bekliyor', odendi: '✓ Ödendi', odenmedi: 'Ödenmedi',
+    girdi: '⏳ {ad} girdi:', elleDuzeltildi: 'elle düzeltildi', onayla: '✓ Onayla', reddet: '✗ Reddet',
+    urunAdi: 'Ürün adı', indirimsizSecenek: 'İndirimsiz (−%20)', indirimliSecenek: 'İndirimli',
+    dusulecekX: 'Düşülecek: {x}', sil: 'Sil', bekleyenKiyafet: '→ {x} düşülecek',
+    nKayitBekliyor: '⏳ {n} kayıt onay bekliyor', hepsiniOnayla: '✓ Hepsini onayla',
+    personelAdi: 'Personel adı', saatUcreti: 'Saat ücreti (€)', girisKoduEtiket: 'Giriş kodu:', koduGonder: 'Kodu gönder', yeniKod: 'Yeni kod', personeliSil: 'Personeli sil',
+    calistigiGunler: 'Çalıştığı günler', onayliSaatler: '(onaylı saatler)', gun: 'Gün', gelis: 'Geliş', cikis: 'Çıkış', sure: 'Süre',
+    haftalikToplam: 'Haftalık toplam', aldigiKiyafetler: 'Aldığı kıyafetler', urun: 'Ürün', fiyat: 'Fiyat', tur: 'Tür', dusulecek: 'Düşülecek',
+    kiyafetYok: 'Bu hafta kıyafet yok.', kiyafetEkle: '+ Kıyafet ekle',
+    kiyafetNot: 'İndirimsiz kıyafette %20 personel indirimi uygulanır, indirimli üründe ek indirim yok. Onay bekleyenler hesaba girmez.',
+    toplamSaat: 'Toplam saat', saatCarpiUcret: 'Saat × ücret', kiyafetler: 'Kıyafetler', odenecek: 'Ödenecek',
+    personelSayisi: 'Personel', toplamUcret: 'Toplam ücret', kiyafetKesintisi: 'Kıyafet kesintisi', odenecekToplam: 'Ödenecek toplam', odenen: 'Ödenen', kalanBorc: 'Kalan borç',
+    eskiVeri: 'Bu cihazda eski programdan kalan {n} personelin kayıtları var.', aktar: 'Ortak tabloya aktar',
+    digerHafta: '⏳ {ad}: {tarih} haftasında onay bekleyen kayıt var', goster: 'Göster',
+    bekliyorKisa: '⏳ Bekliyor', onayliKisa: '✓ Onaylı',
+    dunAcik: 'Dün {s} saatinde geldin, çıkış yapılmadı.', geldim: 'Geldim', ciktim: 'Çıktım',
+    bugunGelis: 'Bugün geliş: {s}', bugunOzet: 'Bugün: {a} – {b} ({d})',
+    duzeltIpucu: 'Saati yanlışsa aşağıdan düzeltebilirsin. Düzeltilen saat yöneticiye işaretli gider.',
+    indirimsizUrun: 'İndirimsiz ürün', indirimliUrun: 'İndirimli ürün', onaylandi: '✓ Onaylandı', onayBekliyor: '⏳ Onay bekliyor',
+    haftaOdendi: '✓ Bu hafta ödendi. Kayıtlar artık değiştirilemez.',
+    calistiginGunler: 'Çalıştığın günler', onaylanan: 'Onaylanan', onayBekleyen: 'Onay bekleyen', aldiginKiyafetler: 'Aldığın kıyafetler',
+    fiyatEuro: 'Fiyat €', ekle: 'Ekle', yukleniyor: 'Yükleniyor…', personelYok: 'Henüz personel yok. “+ Personel ekle” ile başla.',
+    fiyatRakam: 'Fiyatı rakamla yaz (ör. 24,99).', eklendiBekler: 'Eklendi. Yönetici onaylayınca kesinleşir.',
+    kodMesaji: 'Personel Takip giriş kodun: {k}', kodKopyalandi: 'Kod kopyalandı: {k}',
+    gelisKaydedildi: 'Geliş kaydedildi: {s}', cikisKaydedildi: 'Çıkış kaydedildi: {s}',
+    kiyafetSilSor: 'Bu kıyafet silinsin mi?', yeniKodSor: '{ad} için yeni kod üretilsin mi? Eski kod hemen çalışmaz olur.',
+    personelSilSor: '{ad} ve bütün haftalardaki kayıtları silinsin mi? Geri alınamaz.', buPersonel: 'Bu personel',
+    aktarSor: '{n} personelin eski kayıtları ortak tabloya aktarılsın mı?', aktarildi: 'Aktarıldı. Her personele bir giriş kodu verildi.',
+    adSor: 'Personelin adı:', eklendiKod: 'Eklendi. Giriş kodu birkaç saniye içinde görünecek.',
+    h_odendi: 'Bu hafta ödendi, değiştirilemez.', h_zatenGiris: 'Bugün zaten giriş yapılmış ({s}).',
+    h_ikisiVar: 'Bugünün giriş ve çıkışı zaten var. Değiştirmek için saati elle düzelt.', h_onceGeldim: 'Önce "Geldim" tuşuna basılmalı.',
+    h_saat: 'Geçersiz saat.', h_urunAdi: 'Ürün adı boş olamaz.', h_onayli: 'Onaylanmış kıyafet değiştirilemez.', h_fiyat: 'Geçersiz fiyat.'
+  },
+  nl: {
+    yerel: 'nl-NL',
+    gunler: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
+    uygulamaAdi: 'Personeelsregistratie', girisAciklama: 'Vul de inlogcode in die je hebt gekregen.', girisKodu: 'Inlogcode', sunucuAdresi: 'Serveradres',
+    giris: 'Inloggen', kontrol: 'Controleren…', koduYaz: 'Vul de code in.', kodYanlis: 'Deze code klopt niet.', baglanamadi: 'Geen verbinding. Controleer je internet.',
+    kodGecersiz: 'Deze code is niet meer geldig. Vraag je leidinggevende om een nieuwe code.',
+    tumPersonel: '‹ Alle medewerkers', oncekiHafta: 'Vorige week', sonrakiHafta: 'Volgende week', buHafta: 'Deze week',
+    personelEkle: '+ Medewerker toevoegen', yenile: 'Vernieuwen', yazdir: 'Afdrukken', cikisYap: 'Uitloggen', dil: 'Taal',
+    internetYok: 'Geen internet', internetYokN: 'Geen internet · {n} nog te versturen', kaydediliyor: 'Opslaan…', yenileniyor: 'Vernieuwen…', guncel: '● Bijgewerkt {t}',
+    gonderilmedi: '{n} wijzigingen zijn nog niet verstuurd en gaan verloren als je uitlogt. Toch uitloggen?', cikisSor: 'Uitloggen?',
+    isimsiz: 'Naamloze medewerker', personel: 'Medewerker', saatBirim: '{h} uur', kayitYok: 'Deze week niets geregistreerd',
+    nBekliyor: '⏳ Wacht op goedkeuring: {n}', odendi: '✓ Betaald', odenmedi: 'Niet betaald',
+    girdi: '⏳ {ad} vulde in:', elleDuzeltildi: 'handmatig gewijzigd', onayla: '✓ Goedkeuren', reddet: '✗ Afwijzen',
+    urunAdi: 'Productnaam', indirimsizSecenek: 'Niet afgeprijsd (−20%)', indirimliSecenek: 'Afgeprijsd',
+    dusulecekX: 'Inhouding: {x}', sil: 'Verwijderen', bekleyenKiyafet: '→ {x} inhouding',
+    nKayitBekliyor: '⏳ Wacht op goedkeuring: {n}', hepsiniOnayla: '✓ Alles goedkeuren',
+    personelAdi: 'Naam medewerker', saatUcreti: 'Uurloon (€)', girisKoduEtiket: 'Inlogcode:', koduGonder: 'Code versturen', yeniKod: 'Nieuwe code', personeliSil: 'Medewerker verwijderen',
+    calistigiGunler: 'Gewerkte dagen', onayliSaatler: '(goedgekeurde uren)', gun: 'Dag', gelis: 'Begin', cikis: 'Einde', sure: 'Duur',
+    haftalikToplam: 'Totaal deze week', aldigiKiyafetler: 'Gekochte kleding', urun: 'Product', fiyat: 'Prijs', tur: 'Soort', dusulecek: 'Inhouding',
+    kiyafetYok: 'Deze week geen kleding.', kiyafetEkle: '+ Kleding toevoegen',
+    kiyafetNot: 'Op niet-afgeprijsde kleding krijgt personeel 20% korting, op afgeprijsde artikelen geen extra korting. Regels die nog op goedkeuring wachten tellen niet mee.',
+    toplamSaat: 'Totaal uren', saatCarpiUcret: 'Uren × uurloon', kiyafetler: 'Kleding', odenecek: 'Te betalen',
+    personelSayisi: 'Medewerkers', toplamUcret: 'Totaal loon', kiyafetKesintisi: 'Inhouding kleding', odenecekToplam: 'Totaal te betalen', odenen: 'Betaald', kalanBorc: 'Nog te betalen',
+    eskiVeri: 'Op dit apparaat staan gegevens van {n} medewerkers uit het oude programma.', aktar: 'Naar gedeelde tabel overzetten',
+    digerHafta: '⏳ {ad}: in de week van {tarih} wacht nog iets op goedkeuring', goster: 'Bekijken',
+    bekliyorKisa: '⏳ Wacht', onayliKisa: '✓ Goedgekeurd',
+    dunAcik: 'Je bent gisteren om {s} ingeklokt en nog niet uitgeklokt.', geldim: 'Inklokken', ciktim: 'Uitklokken',
+    bugunGelis: 'Vandaag ingeklokt: {s}', bugunOzet: 'Vandaag: {a} – {b} ({d})',
+    duzeltIpucu: 'Klopt de tijd niet? Pas hem hieronder aan. Je leidinggevende ziet dat de tijd is aangepast.',
+    indirimsizUrun: 'Niet afgeprijsd', indirimliUrun: 'Afgeprijsd', onaylandi: '✓ Goedgekeurd', onayBekliyor: '⏳ Wacht op goedkeuring',
+    haftaOdendi: '✓ Deze week is betaald. Er kan niets meer worden gewijzigd.',
+    calistiginGunler: 'Jouw gewerkte dagen', onaylanan: 'Goedgekeurd', onayBekleyen: 'Wacht op goedkeuring', aldiginKiyafetler: 'Jouw gekochte kleding',
+    fiyatEuro: 'Prijs €', ekle: 'Toevoegen', yukleniyor: 'Laden…', personelYok: 'Nog geen medewerkers. Begin met “+ Medewerker toevoegen”.',
+    fiyatRakam: 'Vul de prijs in als getal (bijv. 24,99).', eklendiBekler: 'Toegevoegd. Definitief zodra je leidinggevende het goedkeurt.',
+    kodMesaji: 'Je inlogcode voor Personel Takip: {k}', kodKopyalandi: 'Code gekopieerd: {k}',
+    gelisKaydedildi: 'Ingeklokt om {s}', cikisKaydedildi: 'Uitgeklokt om {s}',
+    kiyafetSilSor: 'Dit kledingstuk verwijderen?', yeniKodSor: 'Nieuwe code maken voor {ad}? De oude code werkt dan meteen niet meer.',
+    personelSilSor: '{ad} en alle registraties van alle weken verwijderen? Dit kan niet ongedaan worden gemaakt.', buPersonel: 'Deze medewerker',
+    aktarSor: 'Oude gegevens van {n} medewerkers naar de gedeelde tabel overzetten?', aktarildi: 'Overgezet. Elke medewerker heeft een inlogcode gekregen.',
+    adSor: 'Naam van de medewerker:', eklendiKod: 'Toegevoegd. De inlogcode verschijnt over een paar seconden.',
+    h_odendi: 'Deze week is betaald en kan niet meer worden gewijzigd.', h_zatenGiris: 'Je bent vandaag al ingeklokt ({s}).',
+    h_ikisiVar: 'Vandaag is al in- en uitgeklokt. Pas de tijd hieronder aan om iets te wijzigen.', h_onceGeldim: 'Klok eerst in.',
+    h_saat: 'Ongeldige tijd.', h_urunAdi: 'Vul een productnaam in.', h_onayli: 'Goedgekeurde kleding kan niet meer worden gewijzigd.', h_fiyat: 'Ongeldige prijs.'
+  },
+  en: {
+    yerel: 'en-GB',
+    gunler: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    uygulamaAdi: 'Staff Tracker', girisAciklama: 'Enter the login code you were given.', girisKodu: 'Login code', sunucuAdresi: 'Server address',
+    giris: 'Log in', kontrol: 'Checking…', koduYaz: 'Enter the code.', kodYanlis: 'This code is wrong.', baglanamadi: 'Could not connect. Check your internet.',
+    kodGecersiz: 'This code is no longer valid. Ask your manager for a new code.',
+    tumPersonel: '‹ All staff', oncekiHafta: 'Previous week', sonrakiHafta: 'Next week', buHafta: 'This week',
+    personelEkle: '+ Add staff', yenile: 'Refresh', yazdir: 'Print', cikisYap: 'Log out', dil: 'Language',
+    internetYok: 'No internet', internetYokN: 'No internet · {n} waiting to send', kaydediliyor: 'Saving…', yenileniyor: 'Refreshing…', guncel: '● Up to date {t}',
+    gonderilmedi: '{n} changes have not been sent yet and will be lost if you log out. Log out anyway?', cikisSor: 'Log out?',
+    isimsiz: 'Unnamed staff member', personel: 'Staff member', saatBirim: '{h} h', kayitYok: 'No records this week',
+    nBekliyor: '⏳ Awaiting approval: {n}', odendi: '✓ Paid', odenmedi: 'Unpaid',
+    girdi: '⏳ {ad} entered:', elleDuzeltildi: 'edited by hand', onayla: '✓ Approve', reddet: '✗ Reject',
+    urunAdi: 'Item name', indirimsizSecenek: 'Full price (−20%)', indirimliSecenek: 'On sale',
+    dusulecekX: 'Deducted: {x}', sil: 'Delete', bekleyenKiyafet: '→ {x} deducted',
+    nKayitBekliyor: '⏳ Awaiting approval: {n}', hepsiniOnayla: '✓ Approve all',
+    personelAdi: 'Staff name', saatUcreti: 'Hourly wage (€)', girisKoduEtiket: 'Login code:', koduGonder: 'Send code', yeniKod: 'New code', personeliSil: 'Delete staff member',
+    calistigiGunler: 'Days worked', onayliSaatler: '(approved hours)', gun: 'Day', gelis: 'In', cikis: 'Out', sure: 'Hours',
+    haftalikToplam: 'Weekly total', aldigiKiyafetler: 'Clothes bought', urun: 'Item', fiyat: 'Price', tur: 'Type', dusulecek: 'Deducted',
+    kiyafetYok: 'No clothes this week.', kiyafetEkle: '+ Add clothes',
+    kiyafetNot: 'Staff get 20% off full-price clothes; sale items get no extra discount. Entries awaiting approval are not counted.',
+    toplamSaat: 'Total hours', saatCarpiUcret: 'Hours × wage', kiyafetler: 'Clothes', odenecek: 'To pay',
+    personelSayisi: 'Staff', toplamUcret: 'Total wages', kiyafetKesintisi: 'Clothes deductions', odenecekToplam: 'Total to pay', odenen: 'Paid', kalanBorc: 'Still owed',
+    eskiVeri: 'This device has records for {n} staff from the old program.', aktar: 'Move to shared sheet',
+    digerHafta: '⏳ {ad}: entries awaiting approval in the week of {tarih}', goster: 'Show',
+    bekliyorKisa: '⏳ Pending', onayliKisa: '✓ Approved',
+    dunAcik: 'You clocked in yesterday at {s} and did not clock out.', geldim: 'Clock in', ciktim: 'Clock out',
+    bugunGelis: 'Clocked in today: {s}', bugunOzet: 'Today: {a} – {b} ({d})',
+    duzeltIpucu: 'If a time is wrong, fix it below. Your manager will see that it was edited.',
+    indirimsizUrun: 'Full price', indirimliUrun: 'On sale', onaylandi: '✓ Approved', onayBekliyor: '⏳ Awaiting approval',
+    haftaOdendi: '✓ This week has been paid. Entries can no longer be changed.',
+    calistiginGunler: 'Your days worked', onaylanan: 'Approved', onayBekleyen: 'Awaiting approval', aldiginKiyafetler: 'Clothes you bought',
+    fiyatEuro: 'Price €', ekle: 'Add', yukleniyor: 'Loading…', personelYok: 'No staff yet. Start with “+ Add staff”.',
+    fiyatRakam: 'Enter the price as a number (e.g. 24.99).', eklendiBekler: 'Added. It becomes final once your manager approves it.',
+    kodMesaji: 'Your Personel Takip login code: {k}', kodKopyalandi: 'Code copied: {k}',
+    gelisKaydedildi: 'Clocked in at {s}', cikisKaydedildi: 'Clocked out at {s}',
+    kiyafetSilSor: 'Delete this item?', yeniKodSor: 'Create a new code for {ad}? The old code stops working immediately.',
+    personelSilSor: 'Delete {ad} and all their records for every week? This cannot be undone.', buPersonel: 'This staff member',
+    aktarSor: 'Move the old records of {n} staff to the shared sheet?', aktarildi: 'Done. Each staff member has been given a login code.',
+    adSor: 'Staff member’s name:', eklendiKod: 'Added. The login code will appear in a few seconds.',
+    h_odendi: 'This week has been paid and can no longer be changed.', h_zatenGiris: 'You already clocked in today ({s}).',
+    h_ikisiVar: 'Today already has a clock-in and clock-out. Edit the time below to change it.', h_onceGeldim: 'Clock in first.',
+    h_saat: 'Invalid time.', h_urunAdi: 'Enter an item name.', h_onayli: 'Approved clothes can no longer be changed.', h_fiyat: 'Invalid price.'
+  }
+};
+function cihazDili() {
+  const l = (navigator.languages && navigator.languages[0] || navigator.language || 'tr').toLowerCase();
+  return l.startsWith('nl') ? 'nl' : l.startsWith('en') ? 'en' : 'tr';
+}
+let DIL = (() => { try { const d = JSON.parse(localStorage.getItem('pt_dil')); return METIN[d] ? d : cihazDili(); } catch (e) { return cihazDili(); } })();
+function t(anahtar, d) {
+  let s = (METIN[DIL] && METIN[DIL][anahtar]) ?? METIN.tr[anahtar] ?? anahtar;
+  if (d) for (const k in d) s = s.split('{' + k + '}').join(d[k]);
+  return s;
+}
+let para, sayi;
+function bicimleriKur() {
+  para = new Intl.NumberFormat(t('yerel'), { style: 'currency', currency: 'EUR' });
+  sayi = new Intl.NumberFormat(t('yerel'), { maximumFractionDigits: 2 });
+}
+bicimleriKur();
+// Sunucu mesajları Türkçe gelir; seçilen dile çevir
+const SUNUCU_HATALARI = [
+  [/^Bu hafta ödendi/, () => t('h_odendi')],
+  [/^Bugün zaten giriş yapılmış \((.+)\)/, m => t('h_zatenGiris', { s: m[1] })],
+  [/^Bugünün giriş ve çıkışı zaten var/, () => t('h_ikisiVar')],
+  [/^Önce "Geldim"/, () => t('h_onceGeldim')],
+  [/^Geçersiz saat/, () => t('h_saat')],
+  [/^Ürün adı boş/, () => t('h_urunAdi')],
+  [/^Onaylanmış kıyafet/, () => t('h_onayli')],
+  [/^Geçersiz fiyat/, () => t('h_fiyat')]
+];
+function sunucuMesaji(m) { for (const [re, f] of SUNUCU_HATALARI) { const e = String(m).match(re); if (e) return f(e); } return m; }
+
+function sabitMetinleriYaz() {
+  document.documentElement.lang = DIL;
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll('[data-t-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.tAria)); el.title = t(el.dataset.tAria); });
+  document.querySelectorAll('[data-t-ph]').forEach(el => { el.placeholder = t(el.dataset.tPh); });
+  document.querySelectorAll('#dilTuslari [data-dil]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dil === DIL)));
+  document.getElementById('dilSecim').value = DIL;
+}
+function dilDegistir(d) {
+  if (!METIN[d]) return;
+  DIL = d; try { localStorage.setItem('pt_dil', JSON.stringify(d)); } catch (e) {}
+  bicimleriKur(); sabitMetinleriYaz(); ciz();
+}
+
+// ======================= GENEL =======================
+const SUNUCU_VARSAYILAN = 'https://script.google.com/macros/s/AKfycbziwVKu_7P72v1lYr_tI1qb0y2pfUJUh21jN2w_OJOWUJOCIpEsftLu3r2QA7dSNg/exec';
+const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })();
+const NATIVE = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? window.Capacitor.Plugins : null;
+
+function oku(k) { try { const v = localStorage.getItem(k); return v === null ? null : JSON.parse(v); } catch (e) { return null; } }
+function yaz(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function sil(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function sunucuAdresi() { return oku('pt_sunucu') || (SUNUCU_VARSAYILAN.startsWith('http') ? SUNUCU_VARSAYILAN : ''); }
+
+function yerelTarih(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function pazartesi(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+function haftaTarih(h) { const [y, m, g] = h.split('-').map(Number); return new Date(y, m - 1, g); }
+function gunTarihi(i) { const d = haftaTarih(D.hafta); d.setDate(d.getDate() + i); return d; }
+function kisaTarih(d) { return d.toLocaleDateString(t('yerel'), { day: 'numeric', month: 'short' }); }
+function buHaftaAnahtari() { return yerelTarih(pazartesi(new Date())); }
+function idUret() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function kacis(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function saatYaz(s) {
+  if (!s) return '—';
+  const h = Math.floor(s), m = Math.round((s - h) * 60);
+  const sa = DIL === 'tr' ? 'sa' : DIL === 'nl' ? 'u' : 'h', dk = DIL === 'tr' ? 'dk' : 'min';
+  return m ? `${h} ${sa} ${m} ${dk}` : `${h} ${sa}`;
+}
+function cihazSimdi() {
+  const d = new Date();
+  return { tarih: yerelTarih(d), saat: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'), gunNo: (d.getDay() + 6) % 7 };
+}
+
+// ---------------- durum ----------------
+const D = {
+  kod: oku('pt_kod') || '',
+  rol: oku('pt_rol') || '',
+  hafta: buHaftaAnahtari(),
+  v: null,
+  kuyruk: oku('pt_kuyruk') || [],
+  gonderiliyor: false, tekrar: false, cevrimdisi: false, sonGuncelleme: null, cizimBekliyor: false
+};
+
+function toast(m, sure) {
+  const el = document.getElementById('toast');
+  el.textContent = m; el.hidden = false;
+  clearTimeout(toast.z); toast.z = setTimeout(() => { el.hidden = true; }, sure || 3500);
+}
+
+function durumYaz() {
+  const el = document.getElementById('durum');
+  const n = D.kuyruk.length;
+  el.classList.toggle('uyari', D.cevrimdisi);
+  if (D.cevrimdisi) el.textContent = n ? t('internetYokN', { n }) : t('internetYok');
+  else if (D.gonderiliyor) el.textContent = n ? t('kaydediliyor') : t('yenileniyor');
+  else if (D.sonGuncelleme) el.textContent = t('guncel', { t: D.sonGuncelleme.toLocaleTimeString(t('yerel'), { hour: '2-digit', minute: '2-digit' }) });
+  else el.textContent = '';
+}
+
+// ---------------- sunucu ----------------
+async function sunucuyaGonder(kod, hafta, ops) {
+  const adres = sunucuAdresi();
+  if (!adres) throw new Error('no server');
+  const r = await fetch(adres, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ kod, hafta, tz: TZ, ops })
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// Kuyruktaki işlemleri ekrandaki veriye uygula (sunucu cevabı gelene kadar)
+function yerelUygula(v, op) {
+  if (!v || typeof yoneticiOp !== 'function') return;
+  const db = { tablolar: { Personel: v.personel || [], Saatler: v.saatler || [], Kiyafetler: v.kiyafetler || [], Haftalar: v.haftalar || [] }, kirli: {} };
+  const onceki = new Set(db.tablolar.Personel.map(p => p.id));
+  try {
+    if (D.rol === 'yonetici') yoneticiOp(db, op, { tz: TZ }, cihazSimdi);
+    else personelOp(db, v.ben && v.ben.id, op.tur === 'damga' && op.yedek ? op.yedek : op, { tz: TZ }, cihazSimdi);
+  } catch (e) { /* sunucu asıl kararı verir */ }
+  for (const p of db.tablolar.Personel) if (!onceki.has(p.id)) p.kod = '';
+  v.personel = D.rol === 'yonetici' ? db.tablolar.Personel : v.personel;
+  v.saatler = db.tablolar.Saatler; v.kiyafetler = db.tablolar.Kiyafetler; v.haftalar = db.tablolar.Haftalar;
+}
+
+function veriyiAyarla(v, hafta) {
+  v.hafta = hafta;
+  for (const op of D.kuyruk) yerelUygula(v, op);
+  D.v = v;
+}
+
+async function senkron() {
+  if (!D.kod) return;
+  if (D.gonderiliyor) { D.tekrar = true; return; }
+  D.gonderiliyor = true; durumYaz();
+  const giden = D.kuyruk.slice(), hafta = D.hafta;
+  try {
+    const c = await sunucuyaGonder(D.kod, hafta, giden);
+    if (c.kodHatasi) { cikisYap(t('kodGecersiz')); return; }
+    if (!c.ok) throw new Error(c.hata || 'server');
+    const gitti = new Set(giden.map(o => o.opId));
+    D.kuyruk = D.kuyruk.filter(o => !gitti.has(o.opId)); yaz('pt_kuyruk', D.kuyruk);
+    const hatalar = (c.sonuclar || []).filter(s => !s.ok).map(s => sunucuMesaji(s.hata));
+    if (hatalar.length) toast(hatalar.join('\n'), 5000);
+    D.rol = c.rol; yaz('pt_rol', c.rol);
+    D.cevrimdisi = false; D.sonGuncelleme = new Date();
+    if (hafta === D.hafta) { yaz('pt_veri_' + hafta, c.veri); veriyiAyarla(c.veri, hafta); cizIstegi(); }
+  } catch (e) {
+    D.cevrimdisi = true;
+    // İnternet yoksa "Geldim/Çıktım" telefon saatiyle elle giriş olarak bekler
+    let degisti = false;
+    D.kuyruk = D.kuyruk.map(o => { if (o.tur === 'damga' && o.yedek) { degisti = true; return Object.assign({}, o.yedek, { opId: o.opId }); } return o; });
+    if (degisti) yaz('pt_kuyruk', D.kuyruk);
+  } finally {
+    D.gonderiliyor = false; durumYaz();
+    if (D.tekrar) { D.tekrar = false; senkron(); }
+  }
+}
+
+function islem(op) {
+  op.opId = idUret();
+  D.kuyruk.push(op); yaz('pt_kuyruk', D.kuyruk);
+  if (D.v) yerelUygula(D.v, op);
+  ciz(); senkron();
+}
+
+// ---------------- giriş / çıkış ----------------
+function ekranSec() {
+  const girisli = !!(D.kod && D.rol);
+  document.getElementById('girisEkrani').hidden = girisli;
+  document.getElementById('uygulama').hidden = !girisli;
+  if (!girisli) {
+    document.getElementById('sunucuInput').hidden = !!sunucuAdresi();
+    setTimeout(() => document.getElementById('kodInput').focus(), 50);
+  }
+}
+
+async function girisYap() {
+  const kod = document.getElementById('kodInput').value.trim().toUpperCase().replace(/\s+/g, '');
+  const hataEl = document.getElementById('girisHata');
+  const sunucu = document.getElementById('sunucuInput');
+  if (!sunucu.hidden && sunucu.value.trim()) yaz('pt_sunucu', sunucu.value.trim());
+  if (!kod) { hataEl.textContent = t('koduYaz'); return; }
+  const tus = document.getElementById('girisTus');
+  tus.disabled = true; hataEl.textContent = ''; tus.textContent = t('kontrol');
+  try {
+    const c = await sunucuyaGonder(kod, D.hafta, []);
+    if (c.kodHatasi) { hataEl.textContent = t('kodYanlis'); return; }
+    if (!c.ok) throw new Error(c.hata);
+    D.kod = kod; D.rol = c.rol; yaz('pt_kod', kod); yaz('pt_rol', c.rol);
+    D.sonGuncelleme = new Date();
+    yaz('pt_veri_' + D.hafta, c.veri); veriyiAyarla(c.veri, D.hafta);
+    document.getElementById('kodInput').value = '';
+    ekranSec(); ciz();
+  } catch (e) {
+    hataEl.textContent = t('baglanamadi');
+  } finally {
+    tus.disabled = false; tus.textContent = t('giris');
+  }
+}
+
+function cikisYap(mesaj) {
+  if (!mesaj && D.kuyruk.length && !confirm(t('gonderilmedi', { n: D.kuyruk.length }))) return;
+  if (!mesaj && !D.kuyruk.length && !confirm(t('cikisSor'))) return;
+  Object.keys(localStorage).filter(k => k.startsWith('pt_') && k !== 'pt_sunucu' && k !== 'pt_dil').forEach(sil);
+  Object.assign(D, { kod: '', rol: '', v: null, kuyruk: [], sonGuncelleme: null });
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  document.getElementById('girisHata').textContent = mesaj || '';
+  ekranSec();
+}
+
+// ---------------- yönetici görünümü ----------------
+function aktifPid() {
+  if (D.rol !== 'yonetici') return null;
+  const id = decodeURIComponent(location.hash.slice(1));
+  return (D.v?.personel || []).some(p => p.id === id) ? id : null;
+}
+function git(pid) { location.hash = pid ? encodeURIComponent(pid) : ''; }
+
+function kayit(pid) {
+  const v = D.v || {}, h = D.hafta;
+  const p = (v.personel || []).find(x => x.id === pid);
+  const hs = (v.haftalar || []).find(x => x.pid === pid && x.hafta === h);
+  const gunler = {};
+  (v.saatler || []).filter(s => s.pid === pid && s.hafta === h).forEach(s => { gunler[s.gun] = s; });
+  return {
+    gunler,
+    kiyafetler: (v.kiyafetler || []).filter(k => k.pid === pid && k.hafta === h),
+    odendi: !!(hs && hs.odendi === '1'),
+    saatUcreti: hs && hs.saatUcreti !== '' && hs.saatUcreti != null ? hs.saatUcreti : (p ? p.saatUcreti : '')
+  };
+}
+function bekliyorMu(g) { return !!g && ((g.giris || '') !== (g.onayGiris || '') || (g.cikis || '') !== (g.onayCikis || '')); }
+
+function tusHTML(p) {
+  const k = kayit(p.id), h = hesapla(k);
+  const var_ = h.saat > 0 || h.bekleyen > 0 || k.kiyafetler.length > 0;
+  return `<button class="personel-tus" data-git="${kacis(p.id)}">
+    <span class="tus-ad">${kacis(p.ad) || t('isimsiz')}</span>
+    <span class="tus-bilgi">${var_ ? `${t('saatBirim', { h: sayi.format(h.saat) })} · ${para.format(h.net)}` : t('kayitYok')}</span>
+    <span class="rozetler">
+      ${h.bekleyen ? `<span class="rozet bekliyor">${t('nBekliyor', { n: h.bekleyen })}</span>` : ''}
+      ${var_ ? `<span class="rozet ${k.odendi ? 'odendi' : 'odenmedi'}">${k.odendi ? t('odendi') : t('odenmedi')}</span>` : ''}
+    </span>
+  </button>`;
+}
+
+function kartHTML(p) {
+  const k = kayit(p.id), h = hesapla(k);
+  const gunler = t('gunler');
+  const satirlar = gunler.map((ad, i) => {
+    const g = k.gunler[i] || {};
+    const bek = bekliyorMu(g);
+    return `<tr>
+      <td>${ad}<br><span class="tarih">${kisaTarih(gunTarihi(i))}</span></td>
+      <td><input type="time" data-alan="giris" data-gun="${i}" value="${kacis(g.onayGiris)}" aria-label="${ad} ${t('gelis')}"></td>
+      <td><input type="time" data-alan="cikis" data-gun="${i}" value="${kacis(g.onayCikis)}" aria-label="${ad} ${t('cikis')}"></td>
+      <td class="sayi">${saatYaz(gunSaati(g.onayGiris, g.onayCikis))}</td>
+    </tr>${bek ? `<tr class="bekleyen-satir"><td colspan="4">${t('girdi', { ad: kacis(p.ad) || t('personel') })} <b>${kacis(g.giris) || '—'} – ${kacis(g.cikis) || '—'}</b>${g.elle === '1' ? `<span class="etiket">${t('elleDuzeltildi')}</span>` : ''}
+      <button class="kucuk onay" data-islem="onayla-gun" data-gun="${i}">${t('onayla')}</button><button class="kucuk sil" data-islem="reddet-gun" data-gun="${i}">${t('reddet')}</button></td></tr>` : ''}`;
+  }).join('');
+  const kiyafetler = k.kiyafetler.map(x => x.onay === '1'
+    ? `<tr class="kiyafet-satir" data-kid="${kacis(x.id)}">
+      <td><input class="k-ad" data-kalan="ad" value="${kacis(x.ad)}" placeholder="${t('urunAdi')}"></td>
+      <td><input class="k-fiyat" data-kalan="fiyat" inputmode="decimal" value="${kacis(x.fiyat)}" placeholder="0,00"></td>
+      <td><select data-kalan="indirimli">
+        <option value="0" ${indirimliMi(x) ? '' : 'selected'}>${t('indirimsizSecenek')}</option>
+        <option value="1" ${indirimliMi(x) ? 'selected' : ''}>${t('indirimliSecenek')}</option>
+      </select></td>
+      <td class="sayi">${t('dusulecekX', { x: para.format(kiyafetTutari(x)) })}</td>
+      <td class="yazdirma"><button class="kucuk sil" data-islem="kiyafet-sil" title="${t('sil')}" aria-label="${t('sil')}">×</button></td>
+    </tr>`
+    : `<tr class="kiyafet-bekliyor" data-kid="${kacis(x.id)}"><td colspan="5">⏳ <b>${kacis(x.ad)}</b> · ${para.format(sayiOku(x.fiyat))} · ${indirimliMi(x) ? t('indirimliSecenek') : t('indirimsizSecenek')}
+      ${t('bekleyenKiyafet', { x: para.format(kiyafetTutari(x)) })}
+      <button class="kucuk onay" data-islem="onayla-kiy">${t('onayla')}</button><button class="kucuk sil" data-islem="reddet-kiy">${t('reddet')}</button></td></tr>`
+  ).join('');
+  return `<article class="kart" data-pid="${kacis(p.id)}">
+    ${h.bekleyen ? `<div class="duyuru" style="margin-bottom:12px">${t('nKayitBekliyor', { n: h.bekleyen })} <button class="kucuk onay" data-islem="hepsini-onayla">${t('hepsiniOnayla')}</button></div>` : ''}
+    <div class="kart-ust">
+      <input class="ad" data-alan="ad" value="${kacis(p.ad)}" placeholder="${t('personelAdi')}" aria-label="${t('personelAdi')}">
+      <label class="alan">${t('saatUcreti')} <input inputmode="decimal" data-alan="ucret" value="${kacis(k.saatUcreti)}"></label>
+      <button class="durum-tus ${k.odendi ? 'odendi' : 'odenmedi'}" data-islem="odendi">${k.odendi ? t('odendi') : t('odenmedi')}</button>
+    </div>
+    <div class="kod-alan">${t('girisKoduEtiket')} <b>${p.kod ? kacis(p.kod) : '…'}</b>
+      <button class="kucuk" data-islem="kod-paylas" ${p.kod ? '' : 'disabled'}>${t('koduGonder')}</button>
+      <button class="kucuk" data-islem="kod-yenile">${t('yeniKod')}</button>
+      <button class="kucuk sil" data-islem="personel-sil">${t('personeliSil')}</button>
+    </div>
+    <div class="ic">
+      <div>
+        <h3>${t('calistigiGunler')} <span class="tarih">${t('onayliSaatler')}</span></h3>
+        <table class="gunler">
+          <thead><tr><th>${t('gun')}</th><th>${t('gelis')}</th><th>${t('cikis')}</th><th class="sayi">${t('sure')}</th></tr></thead>
+          <tbody>${satirlar}</tbody>
+          <tfoot><tr><td colspan="3">${t('haftalikToplam')}</td><td class="sayi">${saatYaz(h.saat)}</td></tr></tfoot>
+        </table>
+      </div>
+      <div>
+        <h3>${t('aldigiKiyafetler')}</h3>
+        <table class="kiyafet-tablo">
+          <thead><tr><th>${t('urun')}</th><th>${t('fiyat')}</th><th>${t('tur')}</th><th class="sayi">${t('dusulecek')}</th><th class="yazdirma"></th></tr></thead>
+          <tbody>${kiyafetler || `<tr><td colspan="5" class="tarih">${t('kiyafetYok')}</td></tr>`}</tbody>
+        </table>
+        <button class="kucuk yazdirma" style="margin-top:8px" data-islem="kiyafet-ekle">${t('kiyafetEkle')}</button>
+        <p class="not">${t('kiyafetNot')}</p>
+        <div class="hesap">
+          <div><span>${t('toplamSaat')}</span><span>${t('saatBirim', { h: sayi.format(h.saat) })}</span></div>
+          <div><span>${t('saatCarpiUcret')}</span><span>${para.format(h.brut)}</span></div>
+          <div><span>${t('kiyafetler')}</span><span>− ${para.format(h.kiyafet)}</span></div>
+          <div class="net"><span>${t('odenecek')}</span><span class="${h.net < 0 ? 'eksi' : ''}">${para.format(h.net)}</span></div>
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function ozetHTML() {
+  let saat = 0, brut = 0, kiy = 0, net = 0, odenen = 0, kalan = 0;
+  const personel = D.v?.personel || [];
+  for (const p of personel) {
+    const k = kayit(p.id), h = hesapla(k);
+    saat += h.saat; brut += h.brut; kiy += h.kiyafet; net += h.net;
+    if (k.odendi) odenen += h.net; else kalan += h.net;
+  }
+  const kutu = (a, v) => `<div class="ozet-kutu"><small>${t(a)}</small><b>${v}</b></div>`;
+  return kutu('personelSayisi', personel.length) + kutu('toplamSaat', sayi.format(yuvarla(saat))) +
+    kutu('toplamUcret', para.format(yuvarla(brut))) + kutu('kiyafetKesintisi', para.format(yuvarla(kiy))) +
+    kutu('odenecekToplam', para.format(yuvarla(net))) + kutu('odenen', para.format(yuvarla(odenen))) +
+    kutu('kalanBorc', para.format(yuvarla(kalan)));
+}
+
+function duyurularHTML() {
+  const parca = [];
+  const eski = oku('personel_takip_v1');
+  if (D.rol === 'yonetici' && eski && Array.isArray(eski.personel) && eski.personel.length) {
+    parca.push(`<div class="duyuru">${t('eskiVeri', { n: eski.personel.length })}
+      <button class="kucuk birincil" data-islem="ice-aktar">${t('aktar')}</button></div>`);
+  }
+  if (D.rol === 'yonetici' && D.v?.bekleyen) {
+    const adlar = {}; (D.v.personel || []).forEach(p => { adlar[p.id] = p.ad || t('isimsiz'); });
+    const digerHafta = Object.keys(D.v.bekleyen).map(k => k.split('|')).filter(([pid, h]) => h !== D.hafta && adlar[pid]);
+    digerHafta.slice(0, 5).forEach(([pid, h]) => parca.push(`<div class="duyuru">${t('digerHafta', { ad: kacis(adlar[pid]), tarih: kisaTarih(haftaTarih(h)) })}
+      <button class="kucuk" data-islem="haftaya-git" data-pid="${kacis(pid)}" data-hafta="${h}">${t('goster')}</button></div>`));
+  }
+  return parca.join('');
+}
+
+// ---------------- personel görünümü ----------------
+function personelSayfasi() {
+  const v = D.v || {};
+  const gunler = {};
+  (v.saatler || []).filter(s => s.hafta === D.hafta).forEach(s => { gunler[s.gun] = s; });
+  const kiyafetler = (v.kiyafetler || []).filter(k => k.hafta === D.hafta);
+  const hs = (v.haftalar || []).find(x => x.hafta === D.hafta);
+  const kilitli = !!(hs && hs.odendi === '1');
+  let onayliSaat = 0, bekSaat = 0;
+  const satirlar = t('gunler').map((ad, i) => {
+    const g = gunler[i] || {};
+    const bek = bekliyorMu(g);
+    onayliSaat += gunSaati(g.onayGiris, g.onayCikis);
+    if (bek) bekSaat += gunSaati(g.giris, g.cikis);
+    const durum = bek ? `<span class="durum-isaret bek">${t('bekliyorKisa')}</span>`
+      : (g.onayGiris || g.onayCikis) ? `<span class="durum-isaret ok">${t('onayliKisa')}</span>` : '';
+    return `<tr>
+      <td>${ad}<br><span class="tarih">${kisaTarih(gunTarihi(i))}</span></td>
+      <td><input type="time" data-alan="giris" data-gun="${i}" value="${kacis(g.giris)}" ${kilitli ? 'disabled' : ''} aria-label="${ad} ${t('gelis')}"></td>
+      <td><input type="time" data-alan="cikis" data-gun="${i}" value="${kacis(g.cikis)}" ${kilitli ? 'disabled' : ''} aria-label="${ad} ${t('cikis')}"></td>
+      <td class="sayi">${saatYaz(gunSaati(g.giris, g.cikis))}<br>${durum}</td>
+    </tr>`;
+  }).join('');
+
+  // Bugün için büyük tuş
+  let damga = '';
+  if (D.hafta === buHaftaAnahtari() && !kilitli) {
+    const bugunNo = (new Date().getDay() + 6) % 7, bugun = gunler[bugunNo] || {}, dun = bugunNo > 0 ? (gunler[bugunNo - 1] || {}) : {};
+    const tarihYazi = new Date().toLocaleDateString(t('yerel'), { weekday: 'long', day: 'numeric', month: 'long' });
+    if (!bugun.giris && dun.giris && !dun.cikis) {
+      damga = `<span class="bugun">${t('dunAcik', { s: kacis(dun.giris) })}</span><button class="damga-tus ciktim" data-islem="ciktim">${t('ciktim')}</button>`;
+    } else if (!bugun.giris) {
+      damga = `<span class="bugun">${tarihYazi}</span><button class="damga-tus geldim" data-islem="geldim">${t('geldim')}</button>`;
+    } else if (!bugun.cikis) {
+      damga = `<span class="bugun">${t('bugunGelis', { s: `<b>${kacis(bugun.giris)}</b>` })}</span><button class="damga-tus ciktim" data-islem="ciktim">${t('ciktim')}</button>`;
+    } else {
+      damga = `<span class="bugun">${t('bugunOzet', { a: `<b>${kacis(bugun.giris)}`, b: `${kacis(bugun.cikis)}</b>`, d: saatYaz(gunSaati(bugun.giris, bugun.cikis)) })}</span>`;
+    }
+    damga = `<div class="damga">${damga}<span class="tarih">${t('duzeltIpucu')}</span></div>`;
+  }
+
+  const kiyRows = kiyafetler.map(k => `<tr data-kid="${kacis(k.id)}">
+      <td><b>${kacis(k.ad)}</b><br><span class="tarih">${indirimliMi(k) ? t('indirimliUrun') : t('indirimsizUrun')}</span></td>
+      <td class="sayi">${para.format(sayiOku(k.fiyat))}</td>
+      <td class="sayi">${k.onay === '1' ? `<span class="durum-isaret ok">${t('onaylandi')}</span>` : `<span class="durum-isaret bek">${t('onayBekliyor')}</span>`}</td>
+      <td>${k.onay !== '1' && !kilitli ? `<button class="kucuk sil" data-islem="p-kiyafet-sil" aria-label="${t('sil')}">×</button>` : ''}</td>
+    </tr>`).join('');
+
+  return `<article class="kart">
+    ${kilitli ? `<div class="duyuru yesil" style="margin-bottom:12px">${t('haftaOdendi')}</div>` : ''}
+    ${damga}
+    <h3>${t('calistiginGunler')}</h3>
+    <table class="gunler">
+      <thead><tr><th>${t('gun')}</th><th>${t('gelis')}</th><th>${t('cikis')}</th><th class="sayi">${t('sure')}</th></tr></thead>
+      <tbody>${satirlar}</tbody>
+      <tfoot>
+        <tr><td colspan="3">${t('onaylanan')}</td><td class="sayi">${saatYaz(yuvarla(onayliSaat))}</td></tr>
+        ${bekSaat ? `<tr><td colspan="3">${t('onayBekleyen')}</td><td class="sayi">${saatYaz(yuvarla(bekSaat))}</td></tr>` : ''}
+      </tfoot>
+    </table>
+    <h3 style="margin-top:18px">${t('aldiginKiyafetler')}</h3>
+    <table>${kiyRows || `<tr><td class="tarih">${t('kiyafetYok')}</td></tr>`}</table>
+    ${kilitli ? '' : `<form class="ekle-form" id="kiyafetForm" autocomplete="off">
+      <input name="ad" placeholder="${t('urunAdi')}" required aria-label="${t('urunAdi')}">
+      <input name="fiyat" placeholder="${t('fiyatEuro')}" inputmode="decimal" required aria-label="${t('fiyat')}">
+      <select name="indirimli" aria-label="${t('tur')}"><option value="0">${t('indirimsizUrun')}</option><option value="1">${t('indirimliUrun')}</option></select>
+      <button class="birincil">${t('ekle')}</button>
+    </form>`}
+  </article>`;
+}
+
+// ---------------- çizim ----------------
+function odakListede() { const a = document.activeElement; return !!(a && a.closest && a.closest('#liste') && /INPUT|SELECT|TEXTAREA/.test(a.tagName)); }
+function cizIstegi() { if (odakListede()) { D.cizimBekliyor = true; return; } ciz(); }
+document.addEventListener('focusout', () => setTimeout(() => { if (D.cizimBekliyor && !odakListede()) { D.cizimBekliyor = false; ciz(); } }, 0));
+
+function ciz() {
+  if (!D.kod) return;
+  durumYaz();
+  const son = gunTarihi(6);
+  document.getElementById('haftaEtiket').textContent =
+    `${kisaTarih(haftaTarih(D.hafta))} – ${son.toLocaleDateString(t('yerel'), { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  const yonetici = D.rol === 'yonetici';
+  const liste = document.getElementById('liste'), ozet = document.getElementById('ozet');
+  document.getElementById('yazdir').hidden = !yonetici || !!NATIVE;
+  if (!D.v) { liste.innerHTML = `<p class="bos">${t('yukleniyor')}</p>`; ozet.hidden = true; return; }
+  if (!yonetici) {
+    document.getElementById('geri').hidden = true; document.getElementById('ekle').hidden = true; ozet.hidden = true;
+    document.getElementById('baslik').textContent = D.v.ben?.ad || t('personel');
+    document.title = (D.v.ben?.ad || t('personel')) + ' · ' + t('uygulamaAdi');
+    document.getElementById('duyurular').innerHTML = '';
+    liste.innerHTML = personelSayfasi();
+    return;
+  }
+  const pid = aktifPid();
+  const p = pid && D.v.personel.find(x => x.id === pid);
+  document.getElementById('geri').hidden = !p;
+  document.getElementById('ekle').hidden = !!p;
+  ozet.hidden = !!p;
+  document.getElementById('baslik').textContent = p ? (p.ad || t('isimsiz')) : t('uygulamaAdi');
+  document.title = p ? `${p.ad || t('personel')} · ${t('uygulamaAdi')}` : t('uygulamaAdi');
+  document.getElementById('duyurular').innerHTML = p ? '' : duyurularHTML();
+  if (p) { liste.innerHTML = kartHTML(p); return; }
+  ozet.innerHTML = ozetHTML();
+  liste.innerHTML = D.v.personel.length
+    ? `<div class="tuslar">${D.v.personel.map(tusHTML).join('')}<button class="personel-tus yeni-tus" data-islem="yeni">${t('personelEkle')}</button></div>`
+    : `<p class="bos">${t('personelYok')}</p>`;
+}
+
+function haftaDegistir(hafta) {
+  D.hafta = hafta;
+  const onbellek = oku('pt_veri_' + hafta);
+  if (onbellek) veriyiAyarla(onbellek, hafta);
+  else if (D.v) {
+    // Personel listesi haftadan bağımsız; yükleme bitene kadar boş hafta göster
+    veriyiAyarla({ ben: D.v.ben, personel: D.v.personel, saatler: [], kiyafetler: [], haftalar: [], bekleyen: D.v.bekleyen }, hafta);
+  }
+  ciz(); senkron();
+}
+
+// ---------------- olaylar ----------------
+const liste = document.getElementById('liste');
+
+function degisti(e) {
+  const el = e.target;
+  if (D.rol === 'yonetici') {
+    const kart = el.closest('.kart'); if (!kart) return;
+    const pid = kart.dataset.pid;
+    const alan = el.dataset.alan, kalan = el.dataset.kalan;
+    if (alan === 'ad') islem({ tur: 'personel', id: pid, ad: el.value });
+    else if (alan === 'ucret') islem({ tur: 'ucret', pid, hafta: D.hafta, saatUcreti: el.value.trim() });
+    else if (alan === 'giris' || alan === 'cikis') {
+      const gun = el.dataset.gun;
+      islem({ tur: 'saat', pid, hafta: D.hafta, gun: Number(gun),
+        giris: kart.querySelector(`[data-alan="giris"][data-gun="${gun}"]`).value,
+        cikis: kart.querySelector(`[data-alan="cikis"][data-gun="${gun}"]`).value });
+    } else if (kalan) {
+      const satir = el.closest('[data-kid]');
+      islem({ tur: 'kiyafet', id: satir.dataset.kid, pid, hafta: D.hafta,
+        ad: satir.querySelector('[data-kalan="ad"]').value,
+        fiyat: satir.querySelector('[data-kalan="fiyat"]').value.trim(),
+        indirimli: satir.querySelector('[data-kalan="indirimli"]').value === '1' });
+    }
+  } else {
+    const alan = el.dataset.alan;
+    if (alan === 'giris' || alan === 'cikis') {
+      const gun = el.dataset.gun;
+      islem({ tur: 'saat', hafta: D.hafta, gun: Number(gun),
+        giris: liste.querySelector(`[data-alan="giris"][data-gun="${gun}"]`).value,
+        cikis: liste.querySelector(`[data-alan="cikis"][data-gun="${gun}"]`).value });
+    }
+  }
+}
+liste.addEventListener('change', degisti);
+
+liste.addEventListener('submit', e => {
+  if (e.target.id !== 'kiyafetForm') return;
+  e.preventDefault();
+  const f = e.target;
+  const fiyat = f.fiyat.value.trim().replace(',', '.');
+  if (fiyat === '' || !(Number(fiyat) >= 0)) { toast(t('fiyatRakam')); return; }
+  islem({ tur: 'kiyafet', id: idUret(), hafta: D.hafta, ad: f.ad.value.trim(), fiyat, indirimli: f.indirimli.value === '1' });
+  toast(t('eklendiBekler'));
+});
+
+async function kodPaylas(p) {
+  const metin = t('kodMesaji', { k: p.kod });
+  try {
+    if (NATIVE && NATIVE.Share) { await NATIVE.Share.share({ title: t('girisKodu'), text: metin }); return; }
+    if (navigator.share) { await navigator.share({ title: t('girisKodu'), text: metin }); return; }
+    await navigator.clipboard.writeText(metin); toast(t('kodKopyalandi', { k: p.kod }));
+  } catch (e) { /* vazgeçildi */ }
+}
+
+function damgaBas(yon) {
+  // Telefon saatine göre yedek: internet yoksa bu "elle" giriş olarak gider
+  const s = cihazSimdi();
+  const hafta = buHaftaAnahtari();
+  const gunler = {};
+  (D.v?.saatler || []).filter(x => x.hafta === hafta).forEach(x => { gunler[x.gun] = x; });
+  let yedek = null;
+  if (yon === 'geldim') yedek = { tur: 'saat', hafta, gun: s.gunNo, giris: s.saat, cikis: '' };
+  else {
+    const bugun = gunler[s.gunNo], dun = gunler[s.gunNo - 1];
+    if (bugun && bugun.giris && !bugun.cikis) yedek = { tur: 'saat', hafta, gun: s.gunNo, giris: bugun.giris, cikis: s.saat };
+    else if (dun && dun.giris && !dun.cikis) yedek = { tur: 'saat', hafta, gun: s.gunNo - 1, giris: dun.giris, cikis: s.saat };
+  }
+  islem({ tur: 'damga', yon, yedek });
+  toast(yon === 'geldim' ? t('gelisKaydedildi', { s: s.saat }) : t('cikisKaydedildi', { s: s.saat }));
+}
+
+liste.addEventListener('click', e => {
+  const tus = e.target.closest('[data-git]');
+  if (tus) { git(tus.dataset.git); return; }
+  const b = e.target.closest('[data-islem]'); if (!b) return;
+  const is = b.dataset.islem;
+  if (is === 'yeni') { personelEkle(); return; }
+  if (is === 'geldim' || is === 'ciktim') { damgaBas(is); return; }
+  if (is === 'p-kiyafet-sil') { if (confirm(t('kiyafetSilSor'))) islem({ tur: 'kiyafetSil', id: b.closest('[data-kid]').dataset.kid }); return; }
+  const kart = b.closest('.kart'); if (!kart) return;
+  const pid = kart.dataset.pid, p = (D.v.personel || []).find(x => x.id === pid);
+  const kid = b.closest('[data-kid]')?.dataset.kid;
+  const ad = (p && p.ad) || t('buPersonel');
+  switch (is) {
+    case 'odendi': islem({ tur: 'odendi', pid, hafta: D.hafta, deger: !kayit(pid).odendi }); break;
+    case 'hepsini-onayla': islem({ tur: 'onayla', pid, hafta: D.hafta }); break;
+    case 'onayla-gun': islem({ tur: 'onayla', pid, hafta: D.hafta, gun: Number(b.dataset.gun) }); break;
+    case 'reddet-gun': islem({ tur: 'reddet', pid, hafta: D.hafta, gun: Number(b.dataset.gun) }); break;
+    case 'onayla-kiy': islem({ tur: 'onayla', pid, hafta: D.hafta, kiyafetId: kid }); break;
+    case 'reddet-kiy': islem({ tur: 'reddet', pid, hafta: D.hafta, kiyafetId: kid }); break;
+    case 'kiyafet-ekle': {
+      const id = idUret();
+      islem({ tur: 'kiyafet', id, pid, hafta: D.hafta, ad: '', fiyat: '', indirimli: false });
+      const s = liste.querySelector(`[data-kid="${id}"] .k-ad`); if (s) s.focus();
+      break;
+    }
+    case 'kiyafet-sil': islem({ tur: 'kiyafetSil', id: kid }); break;
+    case 'kod-paylas': kodPaylas(p); break;
+    case 'kod-yenile': if (confirm(t('yeniKodSor', { ad }))) islem({ tur: 'kodYenile', id: pid }); break;
+    case 'personel-sil': if (confirm(t('personelSilSor', { ad }))) { islem({ tur: 'personelSil', id: pid }); git(''); } break;
+  }
+});
+
+document.getElementById('duyurular').addEventListener('click', e => {
+  const b = e.target.closest('[data-islem]'); if (!b) return;
+  if (b.dataset.islem === 'ice-aktar') {
+    const eski = oku('personel_takip_v1');
+    if (!eski || !confirm(t('aktarSor', { n: eski.personel.length }))) return;
+    islem({ tur: 'iceAktar', veri: eski });
+    yaz('personel_takip_v1_aktarildi', eski); sil('personel_takip_v1');
+    toast(t('aktarildi'));
+    ciz();
+  }
+  if (b.dataset.islem === 'haftaya-git') { location.hash = encodeURIComponent(b.dataset.pid); haftaDegistir(b.dataset.hafta); }
+});
+
+function personelEkle() {
+  const ad = prompt(t('adSor'));
+  if (ad === null || !ad.trim()) return;
+  const id = idUret();
+  const son = (D.v?.personel || []).at(-1);
+  islem({ tur: 'personel', id, ad: ad.trim(), saatUcreti: son ? son.saatUcreti : '' });
+  git(id);
+  toast(t('eklendiKod'));
+}
+
+window.addEventListener('hashchange', () => { ciz(); scrollTo(0, 0); });
+document.getElementById('geri').onclick = () => { if (history.length > 1 && location.hash) history.back(); else git(''); };
+document.getElementById('ekle').onclick = personelEkle;
+document.getElementById('onceki').onclick = () => { const d = haftaTarih(D.hafta); d.setDate(d.getDate() - 7); haftaDegistir(yerelTarih(d)); };
+document.getElementById('sonraki').onclick = () => { const d = haftaTarih(D.hafta); d.setDate(d.getDate() + 7); haftaDegistir(yerelTarih(d)); };
+document.getElementById('buHafta').onclick = () => haftaDegistir(buHaftaAnahtari());
+document.getElementById('yenile').onclick = () => senkron();
+document.getElementById('yazdir').onclick = () => window.print();
+document.getElementById('cikis').onclick = () => cikisYap();
+document.getElementById('girisTus').onclick = girisYap;
+document.getElementById('kodInput').addEventListener('keydown', e => { if (e.key === 'Enter') girisYap(); });
+document.getElementById('dilTuslari').addEventListener('click', e => { const b = e.target.closest('[data-dil]'); if (b) dilDegistir(b.dataset.dil); });
+document.getElementById('dilSecim').addEventListener('change', e => dilDegistir(e.target.value));
+
+// Arka planda düzenli yenileme
+setInterval(() => { if (!document.hidden) senkron(); }, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) senkron(); });
+window.addEventListener('online', () => senkron());
+
+if (NATIVE) {
+  const koyu = matchMedia('(prefers-color-scheme: dark)');
+  const cubuk = () => { try {
+    NATIVE.StatusBar.setBackgroundColor({ color: koyu.matches ? '#171716' : '#f4f3ef' });
+    NATIVE.StatusBar.setStyle({ style: koyu.matches ? 'DARK' : 'LIGHT' });
+  } catch (e) {} };
+  cubuk(); koyu.addEventListener('change', cubuk);
+} else if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// Başlat
+sabitMetinleriYaz();
+ekranSec();
+if (D.kod) {
+  const onbellek = oku('pt_veri_' + D.hafta);
+  if (onbellek) veriyiAyarla(onbellek, D.hafta);
+  ciz(); senkron();
+}
+</script>
+</body>
+</html>
